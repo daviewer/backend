@@ -23,7 +23,7 @@ class PatchAnalysisControllerTest {
 
     @Test
     void testUploadDiffFile() throws Exception {
-        Path filePath = Paths.get("src/test/resources/diff/diff_20240914232935.txt");
+        Path filePath = Paths.get("src/test/resources/diff/diff_20240915000306.txt");
         MockMultipartFile diffFile = new MockMultipartFile(
                 "diff-file",
                 "sample.diff",
@@ -35,7 +35,7 @@ class PatchAnalysisControllerTest {
                 "param",
                 "param.json",
                 "application/json",
-                "{ \"aiModelType\": \"OLLAMA\", \"additionalPrompt\": \"\" }".getBytes()
+                "{\"additionalPrompt\": \"\" }".getBytes()
         );
 
 

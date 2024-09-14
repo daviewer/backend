@@ -1,5 +1,5 @@
 package com.daou.reviewer.model;
 
 public enum AIModelType {
-    OLLAMA, GEMMA2
+    OLLAMA
 }

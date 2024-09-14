@@ -32,7 +32,7 @@ public class PatchAnalysisController {
         try {
             return patchAnalysisService.processDiffFile(file, parameter);
         } catch (Exception e) {
-            return new AIUploadDiffResponse<>(500, "파일 처리 중 오류가 발생했습니다.", null);
+            return new AIUploadDiffResponse<>(500, "오류가 발생했습니다.", null);
         }
     }
 

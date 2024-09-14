@@ -1,0 +1,427 @@
+diff --git a/src/main/java/com/daou/reviewer/common/ApiResponseBodyAdvice.java b/src/main/java/com/daou/reviewer/common/ApiResponseBodyAdvice.java
+deleted file mode 100644
+index 2f2f73e..0000000
+--- a/src/main/java/com/daou/reviewer/common/ApiResponseBodyAdvice.java
++++ /dev/null
+@@ -1,31 +0,0 @@
+-package com.daou.reviewer.common;
+-
+-import com.daou.reviewer.domain.dto.AIUploadDiffResponse;
+-import com.daou.reviewer.domain.dto.ApiResponse;
+-import org.springframework.core.MethodParameter;
+-import org.springframework.http.MediaType;
+-import org.springframework.http.converter.HttpMessageConverter;
+-import org.springframework.http.server.ServerHttpRequest;
+-import org.springframework.http.server.ServerHttpResponse;
+-import org.springframework.web.bind.annotation.ControllerAdvice;
+-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+-
+-@ControllerAdvice
+-public class ApiResponseBodyAdvice implements ResponseBodyAdvice<Object> {
+-
+-    @Override
+-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+-        return ApiResponse.class.isAssignableFrom(returnType.getParameterType());
+-    }
+-
+-    @Override
+-    public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
+-        if (body instanceof ApiResponse) {
+-            ApiResponse<?> apiResponse = (ApiResponse<?>) body;
+-            return new AIUploadDiffResponse<>(apiResponse.getCode(), apiResponse.getMessage(), apiResponse.getBody());
+-        }
+-
+-        return body;
+-    }
+-
+-}
+diff --git a/src/main/java/com/daou/reviewer/common/auth/AuthConfiguration.java b/src/main/java/com/daou/reviewer/common/auth/AuthConfiguration.java
+deleted file mode 100644
+index ec7aac0..0000000
+--- a/src/main/java/com/daou/reviewer/common/auth/AuthConfiguration.java
++++ /dev/null
+@@ -1,21 +0,0 @@
+-package com.daou.reviewer.common.auth;
+-
+-import org.springframework.context.annotation.Bean;
+-import org.springframework.context.annotation.Configuration;
+-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+-import org.springframework.security.web.SecurityFilterChain;
+-
+-@Configuration
+-public class AuthConfiguration {
+-    @Bean
+-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+-        http
+-                .csrf(AbstractHttpConfigurer::disable)
+-                .authorizeHttpRequests(auth -> auth
+-                        .anyRequest().permitAll()
+-                );
+-
+-        return http.build();
+-    }
+-}
+diff --git a/src/main/java/com/daou/reviewer/common/error/DaReviewerGlobalException.java b/src/main/java/com/daou/reviewer/common/error/DaReviewerGlobalException.java
+deleted file mode 100644
+index a9aedad..0000000
+--- a/src/main/java/com/daou/reviewer/common/error/DaReviewerGlobalException.java
++++ /dev/null
+@@ -1,16 +0,0 @@
+-package com.daou.reviewer.common.error;
+-
+-public class DaReviewerGlobalException extends RuntimeException{
+-
+-    public DaReviewerGlobalException() {
+-        super();
+-    }
+-
+-    public DaReviewerGlobalException(String message) {
+-        super(message);
+-    }
+-
+-    public DaReviewerGlobalException(String message, Throwable cause) {
+-        super(message, cause);
+-    }
+-}
+diff --git a/src/main/java/com/daou/reviewer/common/error/GlobalExceptionHandler.java b/src/main/java/com/daou/reviewer/common/error/GlobalExceptionHandler.java
+deleted file mode 100644
+index f294739..0000000
+--- a/src/main/java/com/daou/reviewer/common/error/GlobalExceptionHandler.java
++++ /dev/null
+@@ -1,9 +0,0 @@
+-package com.daou.reviewer.common.error;
+-
+-import org.springframework.web.bind.annotation.RestControllerAdvice;
+-
+-@RestControllerAdvice
+-public class GlobalExceptionHandler {
+-
+-
+-}
+diff --git a/src/main/java/com/daou/reviewer/domain/controller/PatchAnalysisController.java b/src/main/java/com/daou/reviewer/domain/controller/PatchAnalysisController.java
+deleted file mode 100644
+index 8cd29eb..0000000
+--- a/src/main/java/com/daou/reviewer/domain/controller/PatchAnalysisController.java
++++ /dev/null
+@@ -1,39 +0,0 @@
+-package com.daou.reviewer.domain.controller;
+-
+-import com.daou.reviewer.domain.dto.AIUploadDiffRequest;
+-import com.daou.reviewer.domain.dto.AIUploadDiffResponse;
+-import com.daou.reviewer.domain.dto.ApiResponse;
+-import com.daou.reviewer.domain.service.PatchAnalysisService;
+-import lombok.RequiredArgsConstructor;
+-import lombok.extern.slf4j.Slf4j;
+-import org.springframework.web.bind.annotation.*;
+-import org.springframework.web.multipart.MultipartFile;
+-
+-@Slf4j
+-@RequiredArgsConstructor
+-@RestController
+-@RequestMapping("/v1")
+-public class PatchAnalysisController {
+-
+-    final PatchAnalysisService patchAnalysisService;
+-
+-    @PostMapping("/diff-analysis/submit")
+-    public ApiResponse<String> uploadDiffFile(
+-            @RequestPart("diff-file") MultipartFile file,
+-            @RequestPart("param") AIUploadDiffRequest parameter) {
+-
+-        // TODO log 공통화
+-        log.info("request info: {}", parameter);
+-
+-        if (file.isEmpty()) {
+-            return new AIUploadDiffResponse<>(400, "파일이 없습니다.", null);
+-        }
+-
+-        try {
+-            return patchAnalysisService.processDiffFile(file, parameter);
+-        } catch (Exception e) {
+-            return new AIUploadDiffResponse<>(500, "파일 처리 중 오류가 발생했습니다.", null);
+-        }
+-    }
+-
+-}
+diff --git a/src/main/java/com/daou/reviewer/domain/dto/AIUploadDiffRequest.java b/src/main/java/com/daou/reviewer/domain/dto/AIUploadDiffRequest.java
+deleted file mode 100644
+index 7598716..0000000
+--- a/src/main/java/com/daou/reviewer/domain/dto/AIUploadDiffRequest.java
++++ /dev/null
+@@ -1,9 +0,0 @@
+-package com.daou.reviewer.domain.dto;
+-
+-import com.daou.reviewer.model.AIModelType;
+-
+-public record AIUploadDiffRequest(
+-        AIModelType aiModelType,
+-        String additionalPrompt // 추가 요청사항
+-) {
+-}
+diff --git a/src/main/java/com/daou/reviewer/domain/dto/AIUploadDiffResponse.java b/src/main/java/com/daou/reviewer/domain/dto/AIUploadDiffResponse.java
+deleted file mode 100644
+index 875cec8..0000000
+--- a/src/main/java/com/daou/reviewer/domain/dto/AIUploadDiffResponse.java
++++ /dev/null
+@@ -1,22 +0,0 @@
+-package com.daou.reviewer.domain.dto;
+-
+-import lombok.AllArgsConstructor;
+-import lombok.Builder;
+-import lombok.Getter;
+-
+-@Builder
+-@Getter
+-@AllArgsConstructor
+-public class AIUploadDiffResponse<T> implements ApiResponse<T> {
+-    private final int code;
+-    private final String message;
+-    private final T body;
+-
+-    public static AIUploadDiffResponse success(String result) {
+-       return AIUploadDiffResponse.builder()
+-               .code(200)
+-               .message("success")
+-               .body(result)
+-               .build();
+-    }
+-}
+\ No newline at end of file
+diff --git a/src/main/java/com/daou/reviewer/domain/dto/ApiResponse.java b/src/main/java/com/daou/reviewer/domain/dto/ApiResponse.java
+deleted file mode 100644
+index 8170d5b..0000000
+--- a/src/main/java/com/daou/reviewer/domain/dto/ApiResponse.java
++++ /dev/null
+@@ -1,7 +0,0 @@
+-package com.daou.reviewer.domain.dto;
+-
+-public interface ApiResponse<T> {
+-    int getCode();
+-    String getMessage();
+-    T getBody();
+-}
+diff --git a/src/main/java/com/daou/reviewer/domain/service/FileConvertManager.java b/src/main/java/com/daou/reviewer/domain/service/FileConvertManager.java
+deleted file mode 100644
+index 5b784ad..0000000
+--- a/src/main/java/com/daou/reviewer/domain/service/FileConvertManager.java
++++ /dev/null
+@@ -1,24 +0,0 @@
+-package com.daou.reviewer.domain.service;
+-
+-import com.daou.reviewer.common.error.DaReviewerGlobalException;
+-import org.springframework.stereotype.Service;
+-import org.springframework.web.multipart.MultipartFile;
+-
+-import java.io.BufferedReader;
+-import java.io.InputStreamReader;
+-import java.nio.charset.StandardCharsets;
+-import java.util.stream.Collectors;
+-
+-@Service
+-public class FileConvertManager {
+-
+-    public String convertFileToString(MultipartFile file) {
+-        try (BufferedReader reader = new BufferedReader(
+-                new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+-            return reader.lines().collect(Collectors.joining("\n"));
+-        } catch (Exception e) {
+-            throw new DaReviewerGlobalException("파일을 문자열로 변환하는 중 오류가 발생했습니다.", e);
+-        }
+-    }
+-
+-}
+diff --git a/src/main/java/com/daou/reviewer/domain/service/PatchAnalysisService.java b/src/main/java/com/daou/reviewer/domain/service/PatchAnalysisService.java
+deleted file mode 100644
+index e4dca9f..0000000
+--- a/src/main/java/com/daou/reviewer/domain/service/PatchAnalysisService.java
++++ /dev/null
+@@ -1,35 +0,0 @@
+-package com.daou.reviewer.domain.service;
+-
+-import com.daou.reviewer.domain.dto.AIUploadDiffRequest;
+-import com.daou.reviewer.domain.dto.AIUploadDiffResponse;
+-import com.daou.reviewer.model.AIModelFactory;
+-import lombok.RequiredArgsConstructor;
+-import org.springframework.ai.chat.model.ChatModel;
+-import org.springframework.stereotype.Service;
+-import org.springframework.web.multipart.MultipartFile;
+-
+-@RequiredArgsConstructor
+-@Service
+-public class PatchAnalysisService {
+-    final AIModelFactory aiModelFactory;
+-    final FileConvertManager fileConvertManager;
+-
+-    // FIXME: Prompt 서비스 레이어 분리 (functional interface + score engin)
+-    final String prompt = "String message = \"\n" +
+-            "\"너는 한국인 시니어 개발자다. 한국어로 대답해줘\n" +
+-            "개발자가 제출한 풀 리퀘스트에서 변경된 다음 파일을 요약합니다.\n" +
+-            "파일 내의 주요 수정, 추가, 삭제 및 중요한 업데이트에 중점을 두고 요약하세요.\n" +
+-            "요약에 파일 이름을 포함하지 말고 글머리 기호로 요약을 나열하세요.\n" +
+-            "문제가 있거나 유지 관리가 까다로운 코드에 대한 조언도 해주세요.\n" +
+-            "요약에 코드 블록/차이점도 줄 번호와 함께 포함하세요.\"\n" +
+-            "\"";
+-
+-    public AIUploadDiffResponse processDiffFile(MultipartFile file, AIUploadDiffRequest request) {
+-        ChatModel chatModel = aiModelFactory.choose(request.aiModelType());
+-        String aiResult = chatModel.call(
+-                fileConvertManager.convertFileToString(file) + "\n" + prompt
+-        );
+-
+-        return AIUploadDiffResponse.success(aiResult);
+-    }
+-}
+diff --git a/src/main/java/com/daou/reviewer/model/AIModelEngine.java b/src/main/java/com/daou/reviewer/model/AIModelEngine.java
+deleted file mode 100644
+index a6934c0..0000000
+--- a/src/main/java/com/daou/reviewer/model/AIModelEngine.java
++++ /dev/null
+@@ -1,8 +0,0 @@
+-package com.daou.reviewer.model;
+-
+-import org.springframework.ai.chat.model.ChatModel;
+-
+-public interface AIModelEngine {
+-    AIModelType getType();
+-    ChatModel getModel();
+-}
+diff --git a/src/main/java/com/daou/reviewer/model/AIModelFactory.java b/src/main/java/com/daou/reviewer/model/AIModelFactory.java
+deleted file mode 100644
+index 32acb3f..0000000
+--- a/src/main/java/com/daou/reviewer/model/AIModelFactory.java
++++ /dev/null
+@@ -1,25 +0,0 @@
+-package com.daou.reviewer.model;
+-
+-import org.springframework.ai.chat.model.ChatModel;
+-import org.springframework.beans.factory.annotation.Autowired;
+-import org.springframework.context.annotation.Configuration;
+-
+-import java.util.List;
+-import java.util.Map;
+-import java.util.stream.Collectors;
+-
+-@Configuration
+-public class AIModelFactory {
+-
+-    Map<AIModelType, ChatModel> aiModelEngineMap;
+-
+-    @Autowired
+-    public AIModelFactory(List<AIModelEngine> aiModels) {
+-        aiModelEngineMap = aiModels.stream().collect(Collectors.toMap(AIModelEngine::getType, AIModelEngine::getModel));
+-    }
+-
+-    public ChatModel choose(AIModelType aiModelType) {
+-        return aiModelEngineMap.get(aiModelType);
+-    }
+-
+-}
+diff --git a/src/main/java/com/daou/reviewer/model/AIModelType.java b/src/main/java/com/daou/reviewer/model/AIModelType.java
+deleted file mode 100644
+index bfdf47a..0000000
+--- a/src/main/java/com/daou/reviewer/model/AIModelType.java
++++ /dev/null
+@@ -1,5 +0,0 @@
+-package com.daou.reviewer.model;
+-
+-public enum AIModelType {
+-    OLLAMA, GEMMA2
+-}
+diff --git a/src/main/java/com/daou/reviewer/model/OllamaAIModel.java b/src/main/java/com/daou/reviewer/model/OllamaAIModel.java
+deleted file mode 100644
+index d90473a..0000000
+--- a/src/main/java/com/daou/reviewer/model/OllamaAIModel.java
++++ /dev/null
+@@ -1,22 +0,0 @@
+-package com.daou.reviewer.model;
+-
+-import lombok.RequiredArgsConstructor;
+-import org.springframework.ai.chat.model.ChatModel;
+-import org.springframework.ai.ollama.OllamaChatModel;
+-import org.springframework.stereotype.Service;
+-
+-@RequiredArgsConstructor
+-@Service
+-public class OllamaAIModel implements AIModelEngine {
+-
+-    private final OllamaChatModel ollamaChatModel;
+-    @Override
+-    public AIModelType getType() {
+-        return AIModelType.OLLAMA;
+-    }
+-
+-    @Override
+-    public ChatModel getModel() {
+-        return ollamaChatModel;
+-    }
+-}
+diff --git a/src/main/resources/application.yml b/src/main/resources/application.yml
+index 29a7eda..4d8c39d 100644
+--- a/src/main/resources/application.yml
++++ b/src/main/resources/application.yml
+@@ -1,6 +1,3 @@
+-server:
+-  port: 8080
+-
+ spring:
+   application:
+     name: reviewer
+diff --git a/src/test/java/com/daou/reviewer/domain/controller/PatchAnalysisControllerTest.java b/src/test/java/com/daou/reviewer/domain/controller/PatchAnalysisControllerTest.java
+deleted file mode 100644
+index 7a11ad4..0000000
+--- a/src/test/java/com/daou/reviewer/domain/controller/PatchAnalysisControllerTest.java
++++ /dev/null
+@@ -1,51 +0,0 @@
+-package com.daou.reviewer.domain.controller;
+-
+-import org.junit.jupiter.api.Test;
+-import org.springframework.beans.factory.annotation.Autowired;
+-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+-import org.springframework.boot.test.context.SpringBootTest;
+-import org.springframework.mock.web.MockMultipartFile;
+-import org.springframework.test.web.servlet.MockMvc;
+-
+-import java.nio.file.Files;
+-import java.nio.file.Path;
+-import java.nio.file.Paths;
+-
+-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+-
+-@SpringBootTest
+-@AutoConfigureMockMvc
+-class PatchAnalysisControllerTest {
+-    @Autowired
+-    private MockMvc mockMvc;
+-
+-    @Test
+-    void testUploadDiffFile() throws Exception {
+-        Path filePath = Paths.get("src/test/resources/diff/diff_20240914232935.txt");
+-        MockMultipartFile diffFile = new MockMultipartFile(
+-                "diff-file",
+-                "sample.diff",
+-                "text/plain",
+-                Files.readAllBytes(filePath)
+-        );
+-
+-        MockMultipartFile jsonParam = new MockMultipartFile(
+-                "param",
+-                "param.json",
+-                "application/json",
+-                "{ \"aiModelType\": \"OLLAMA\", \"additionalPrompt\": \"\" }".getBytes()
+-        );
+-
+-
+-        mockMvc.perform(multipart("/v1/diff-analysis/submit")
+-                        .file(diffFile)
+-                        .file(jsonParam)
+-                        .contentType("multipart/form-data"))
+-                .andDo(print())
+-                .andExpect(status().isOk());
+-    }
+-
+-
+-}
+\ No newline at end of file

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class OllamaAIModel implements AIModelEngine {
+public class OllamaAIModel implements AIChatModel {
 
     private final OllamaChatModel ollamaChatModel;
     @Override

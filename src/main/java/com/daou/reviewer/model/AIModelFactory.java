@@ -14,8 +14,8 @@ public class AIModelFactory {
     Map<AIModelType, ChatModel> aiModelEngineMap;
 
     @Autowired
-    public AIModelFactory(List<AIModelEngine> aiModels) {
-        aiModelEngineMap = aiModels.stream().collect(Collectors.toMap(AIModelEngine::getType, AIModelEngine::getModel));
+    public AIModelFactory(List<AIChatModel> aiModels) {
+        aiModelEngineMap = aiModels.stream().collect(Collectors.toMap(AIChatModel::getType, AIChatModel::getModel));
     }
 
     public ChatModel choose(AIModelType aiModelType) {

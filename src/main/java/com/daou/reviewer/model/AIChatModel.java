@@ -2,7 +2,7 @@ package com.daou.reviewer.model;
 
 import org.springframework.ai.chat.model.ChatModel;
 
-public interface AIModelEngine {
+public interface AIChatModel {
     AIModelType getType();
     ChatModel getModel();
 }

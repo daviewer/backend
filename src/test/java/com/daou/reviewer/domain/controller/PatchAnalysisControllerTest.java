@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -21,8 +22,8 @@ class PatchAnalysisControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void testUploadDiffFile() throws Exception {
-        Path filePath = Paths.get("src/test/resources/test/sample.diff");
+    void testUploadDiffFile() throws Exception {
+        Path filePath = Paths.get("src/test/resources/diff/diff_20240914232935.txt");
         MockMultipartFile diffFile = new MockMultipartFile(
                 "diff-file",
                 "sample.diff",
@@ -30,12 +31,21 @@ class PatchAnalysisControllerTest {
                 Files.readAllBytes(filePath)
         );
 
-        String jsonRequest = "{ \"aiModelType\": \"OLLAMA\", \"additionalPrompt\": \"\" }";
+        MockMultipartFile jsonParam = new MockMultipartFile(
+                "param",
+                "param.json",
+                "application/json",
+                "{ \"aiModelType\": \"OLLAMA\", \"additionalPrompt\": \"\" }".getBytes()
+        );
 
-        mockMvc.perform(multipart("/v1/ai/upload-diff")
-                        .file(diffFile)                        // diff 파일 추가
-                        .param("param", jsonRequest)         // JSON 요청 추가
+
+        mockMvc.perform(multipart("/v1/diff-analysis/submit")
+                        .file(diffFile)
+                        .file(jsonParam)
                         .contentType("multipart/form-data"))
-                .andExpect(status().isOk());                   // 기대하는 응답 상태 코드
+                .andDo(print())
+                .andExpect(status().isOk());
     }
+
+
 }

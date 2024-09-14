@@ -6,19 +6,18 @@ import com.daou.reviewer.domain.dto.ApiResponse;
 import com.daou.reviewer.domain.service.PatchAnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RequiredArgsConstructor
-@RestController("/v1")
+@RestController
+@RequestMapping("/v1")
 public class PatchAnalysisController {
 
     final PatchAnalysisService patchAnalysisService;
 
-    @PostMapping("/ai/upload-diff")
+    @PostMapping("/diff-analysis/submit")
     public ApiResponse<String> uploadDiffFile(
             @RequestPart("diff-file") MultipartFile file,
             @RequestPart("param") AIUploadDiffRequest parameter) {
@@ -36,4 +35,5 @@ public class PatchAnalysisController {
             return new AIUploadDiffResponse<>(500, "파일 처리 중 오류가 발생했습니다.", null);
         }
     }
+
 }

@@ -22,7 +22,6 @@ public class PatchAnalysisController {
             @RequestPart("diff-file") MultipartFile file,
             @RequestPart("param") AIUploadDiffRequest parameter) {
 
-        // TODO log 공통화
         log.info("request info: {}", parameter);
 
         if (file.isEmpty()) {

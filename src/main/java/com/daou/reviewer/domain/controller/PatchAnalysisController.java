@@ -18,21 +18,8 @@ public class PatchAnalysisController {
     final PatchAnalysisService patchAnalysisService;
 
     @PostMapping("/diff-analysis/submit")
-    public ApiResponse<String> uploadDiffFile(
-            @RequestPart("diff-file") MultipartFile file,
-            @RequestPart("param") AIUploadDiffRequest parameter) {
-
-        log.info("request info: {}", parameter);
-
-        if (file.isEmpty()) {
-            return new AIUploadDiffResponse<>(400, "파일이 없습니다.", null);
-        }
-
-        try {
-            return patchAnalysisService.processDiffFile(file, parameter);
-        } catch (Exception e) {
-            return new AIUploadDiffResponse<>(500, "오류가 발생했습니다.", null);
-        }
+    public ApiResponse<Void> uploadDiffFile(@RequestPart("diff-file") MultipartFile file, @RequestPart("param") AIUploadDiffRequest parameter) {
+        return patchAnalysisService.processDiffFile(file, parameter);
     }
 
 }

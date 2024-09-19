@@ -4,6 +4,7 @@ import com.daou.reviewer.domain.dto.AIUploadDiffRequest;
 import com.daou.reviewer.domain.dto.AIUploadDiffResponse;
 import com.daou.reviewer.model.AIModelFactory;
 import com.daou.reviewer.model.AIModelType;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
@@ -27,14 +28,31 @@ public class PatchAnalysisService {
             "그리고 마지막에 0~100점 중에 최종평가 점수를 보여주세요.\"\n" +
             "\"";
 
+    @Transactional
     public AIUploadDiffResponse processDiffFile(MultipartFile file, AIUploadDiffRequest request) {
-        ChatModel chatModel = aiModelFactory.choose(AIModelType.OLLAMA);
-        log.info("ai model type:{}", chatModel);
-        String aiResult = chatModel.call(
-                prompt + "\n" + fileConvertManager.convertFileToString(file)
-        );
+        log.info("request info: {}", request);
+        if (file.isEmpty()) {
+            return AIUploadDiffResponse.fail(400, "파일이 없습니다.");
+        }
+        String aiResult;
+        try {
+            ChatModel chatModel = aiModelFactory.choose(AIModelType.OLLAMA);
+            log.info("ai model type:{}", chatModel);
+            aiResult = chatModel.call(prompt + "\n" + fileConvertManager.convertFileToString(file));
+        } catch (Exception e) {
+            return AIUploadDiffResponse.fail(500, "오류가 발생했습니다.");
+        }
+        saveBranchHistory(request);
+        saveAiResult(aiResult);
 
+        return AIUploadDiffResponse.success("AI 결과 생성 및 저장에 성공했습니다.");
+    }
 
-        return AIUploadDiffResponse.success(aiResult);
+    private void saveBranchHistory(AIUploadDiffRequest request){
+
+    }
+
+    private void saveAiResult(String aiResult){
+
     }
 }

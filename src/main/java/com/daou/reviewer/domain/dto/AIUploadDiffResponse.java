@@ -13,10 +13,18 @@ public class AIUploadDiffResponse<T> implements ApiResponse<T> {
     private final T body;
 
     public static AIUploadDiffResponse success(String result) {
-       return AIUploadDiffResponse.builder()
-               .code(200)
-               .message("success")
-               .body(result)
-               .build();
+        return AIUploadDiffResponse.builder()
+                .code(200)
+                .message("success")
+                .body(result)
+                .build();
+    }
+
+    public static AIUploadDiffResponse fail(int code, String message) {
+        return AIUploadDiffResponse.builder()
+                .code(code)
+                .message(message)
+                .body(null)
+                .build();
     }
 }

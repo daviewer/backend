@@ -9,6 +9,19 @@ server:
 spring:
   application:
     name: reviewer
+  datasource:
+    url: jdbc:h2:~/testDB #TODO: 동시접속 제어 시, tcp 설정 필요
+    driver-class-name: org.h2.Driver
+    username: sa
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create #TODO: test 완료 후, none 으로 변경 필요
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        show_sql: true
   ai:
     ollama:
       base-url: http://localhost:11434

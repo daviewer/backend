@@ -14,3 +14,6 @@ spring:
       base-url: http://localhost:11434
       chat:
         model: qwen2
+
+prompt:
+  fileType: REVIEW_R001

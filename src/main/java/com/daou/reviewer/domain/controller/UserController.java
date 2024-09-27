@@ -2,12 +2,10 @@ package com.daou.reviewer.domain.controller;
 
 import com.daou.reviewer.domain.dto.AIUploadDiffResponse;
 import com.daou.reviewer.domain.dto.ApiResponse;
+import com.daou.reviewer.domain.dto.LoginRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,8 +19,11 @@ public class UserController {
     }
 
     @PostMapping("/user/login")
-    public ApiResponse<String> loginUser(){
-        return AIUploadDiffResponse.success("");
+    public ApiResponse<Boolean> loginUser(@RequestBody LoginRequest request){
+        if("kingmj".equals(request.userId()) || "jhpark".equals(request.userId())){
+            return AIUploadDiffResponse.success("");
+        }
+        return AIUploadDiffResponse.fail(401);
     }
 
     @PostMapping("/project/save")

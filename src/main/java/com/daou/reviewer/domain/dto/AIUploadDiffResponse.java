@@ -19,4 +19,12 @@ public class AIUploadDiffResponse<T> implements ApiResponse<T> {
                .body(result)
                .build();
     }
+    //TODO: test
+    public static AIUploadDiffResponse fail(int code) {
+        return AIUploadDiffResponse.builder()
+                .code(code)
+                .message("fail")
+                .body(null)
+                .build();
+    }
 }

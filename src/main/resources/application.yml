@@ -15,5 +15,13 @@ spring:
       chat:
         model: qwen2
 
+jwt:
+  access:
+    secret-key: test
+    expired: 3600000
+  refresh:
+    secret-key: test2
+    expired: 10800000
+
 prompt:
   fileType: REVIEW_R001

@@ -1,6 +1,6 @@
 package com.daou.reviewer.common.auth;
 
-import com.daou.reviewer.domain.entity.Member;
+import com.daou.reviewer.domain.entity.Users;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -24,27 +24,27 @@ public class JwtGenerator {
     @Value("${jwt.refresh.expired}")
     private long refreshExpiration;
 
-    public String generateAccessToken(Member member) {
+    public String generateAccessToken(Users user) {
         long now = System.currentTimeMillis();
         byte[] keyBytes = Decoders.BASE64.decode(accessSecretKey);
 
         return Jwts.builder()
                    .setHeader(createHeader())
-                   .setClaims(createClaims(member))
-                   .setSubject(member.getLoginId())
+                   .setClaims(createClaims(user))
+                   .setSubject(user.getLoginId())
                    .setIssuedAt(new Date(now))
                    .setExpiration(new Date(now + accessExpiration))
                    .signWith(Keys.hmacShaKeyFor(keyBytes), SignatureAlgorithm.HS256)
                    .compact();
     }
 
-    public String generateRefreshToken(Member member) {
+    public String generateRefreshToken(Users user) {
         long now = System.currentTimeMillis();
         byte[] keyBytes = Decoders.BASE64.decode(refreshSecretKey);
 
         return Jwts.builder()
                    .setHeader(createHeader())
-                   .setSubject(member.getLoginId())
+                   .setSubject(user.getLoginId())
                    .setIssuedAt(new Date(now))
                    .setExpiration(new Date(now + refreshExpiration))
                    .signWith(Keys.hmacShaKeyFor(keyBytes), SignatureAlgorithm.HS256)
@@ -59,9 +59,9 @@ public class JwtGenerator {
         return header;
     }
 
-    private Map<String, Object> createClaims(Member member){
+    private Map<String, Object> createClaims(Users user){
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", member.getId());
+        claims.put("id", user.getUserId());
 
         return claims;
     }

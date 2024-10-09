@@ -1,6 +1,6 @@
 package com.daou.reviewer.domain.entity;
 
-import com.daou.reviewer.domain.enums.QuantityType;
+import com.daou.reviewer.domain.enums.QualityType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.ColumnDefault;
@@ -28,7 +28,7 @@ public class ChatResultHistory {
     @NotNull
     @ColumnDefault("0")
     @Enumerated(EnumType.ORDINAL)
-    private QuantityType quantity;
+    private QualityType quality;
     @NotNull
     @ColumnDefault("1")
     private Boolean status;
